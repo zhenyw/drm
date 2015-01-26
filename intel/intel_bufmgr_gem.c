@@ -3220,6 +3220,15 @@ drm_intel_gem_context_create(drm_intel_bufmgr *bufmgr)
 	return context;
 }
 
+drm_public uint32_t
+drm_intel_gem_context_get_context_id(drm_intel_context *ctx)
+{
+	if (ctx == NULL)
+		return -EINVAL;
+
+	return ctx->ctx_id;
+}
+
 drm_public void
 drm_intel_gem_context_destroy(drm_intel_context *ctx)
 {
