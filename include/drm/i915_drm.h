@@ -58,6 +58,90 @@
 #define I915_ERROR_UEVENT		"ERROR"
 #define I915_RESET_UEVENT		"RESET"
 
+/**
+ * DOC: perf events configuration exposed by i915 through /sys/bus/event_sources/drivers/i915_oa
+ *
+ */
+
+enum drm_i915_oa_format {
+	I915_OA_FORMAT_A13	    = 0, /* HSW only */
+	I915_OA_FORMAT_A29	    = 1, /* HSW only */
+	I915_OA_FORMAT_A13_B8_C8    = 2, /* HSW only */
+	I915_OA_FORMAT_B4_C8	    = 4, /* HSW only */
+	I915_OA_FORMAT_A45_B8_C8    = 5, /* HSW only */
+	I915_OA_FORMAT_B4_C8_A16    = 6, /* HSW only */
+	I915_OA_FORMAT_C4_B8	    = 7, /* HSW+ */
+
+	/* Gen8+ */
+	I915_OA_FORMAT_A12		    = 8,
+	I915_OA_FORMAT_A12_B8_C8	    = 9,
+	I915_OA_FORMAT_A32u40_A4u32_B8_C8   = 10,
+
+	I915_OA_FORMAT_MAX	    /* non-ABI */
+};
+
+enum drm_i915_oa_set {
+	I915_OA_METRICS_SET_3D			= 1,
+	I915_OA_METRICS_SET_COMPUTE		= 2,
+	I915_OA_METRICS_SET_COMPUTE_EXTENDED	= 3,
+	I915_OA_METRICS_SET_MEMORY_READS	= 4,
+	I915_OA_METRICS_SET_MEMORY_WRITES	= 5,
+	I915_OA_METRICS_SET_SAMPLER_BALANCE	= 6,
+
+	I915_OA_METRICS_SET_MAX			/* non-ABI */
+};
+
+#define I915_OA_METRICS_SET_3D			1
+#define I915_OA_METRICS_SET_COMPUTE		2
+#define I915_OA_METRICS_SET_COMPUTE_EXTENDED	3
+#define I915_OA_METRICS_SET_MEMORY_READS	4
+#define I915_OA_METRICS_SET_MEMORY_WRITES	5
+#define I915_OA_METRICS_SET_SAMPLER_BALANCE	6
+#define I915_OA_METRICS_SET_MAX			I915_OA_METRICS_SET_SAMPLER_BALANCE
+
+#define I915_OA_ATTR_SIZE_VER0		32  /* sizeof first published struct */
+
+typedef struct _drm_i915_oa_attr {
+	__u32 size;
+
+	__u32 format;
+	__u32 metrics_set;
+	__u32 timer_exponent;
+
+	__u32 drm_fd;
+	__u32 ctx_id;
+
+	__u64 single_context : 1,
+	      __reserved_1 : 63;
+} drm_i915_oa_attr_t;
+
+/* Header for PERF_RECORD_DEVICE type events */
+typedef struct _drm_i915_oa_event_header {
+	__u32 type;
+	__u32 __reserved_1;
+} drm_i915_oa_event_header_t;
+
+enum drm_i915_oa_event_type {
+
+	/*
+	 * struct {
+	 *	struct perf_event_header	header;
+	 *	drm_i915_oa_event_header_t	i915_oa_header;
+	 * };
+	 */
+	I915_OA_RECORD_BUFFER_OVERFLOW		= 1,
+
+	/*
+	 * struct {
+	 *	struct perf_event_header	header;
+	 *	drm_i915_oa_event_header_t	i915_oa_header;
+	 * };
+	 */
+	I915_OA_RECORD_REPORT_LOST		= 2,
+
+	I915_OA_RECORD_MAX,			/* non-ABI */
+};
+
 /* Each region is a minimum of 16k, and there are at most 255 of them.
  */
 #define I915_NR_TEX_REGIONS 255	/* table size 2k - maximum due to use
@@ -350,6 +434,8 @@ typedef struct drm_i915_irq_wait {
 #define I915_PARAM_REVISION              32
 #define I915_PARAM_SUBSLICE_TOTAL	 33
 #define I915_PARAM_EU_TOTAL		 34
+#define I915_PARAM_SLICE_MASK		 37
+#define I915_PARAM_SUBSLICE_MASK	 38
 
 typedef struct drm_i915_getparam {
 	int param;
